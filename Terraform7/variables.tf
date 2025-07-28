@@ -29,3 +29,7 @@ output "rds_endpoint" {
 variable "image_tag" {
   type = string
 }
+locals {
+  alb_metric_name = replace(aws_lb.strapi_alb.arn_suffix, "loadbalancer/", "")
+  tg_metric_name = replace(aws_lb_target_group.strapi_tg.arn_suffix, "targetgroup/", "")
+}
