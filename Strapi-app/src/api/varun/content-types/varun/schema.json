@@ -1,0 +1,21 @@
+{
+  "kind": "collectionType",
+  "collectionName": "varuns",
+  "info": {
+    "singularName": "varun",
+    "pluralName": "varuns",
+    "displayName": "varun"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "pluginOptions": {},
+  "attributes": {
+    "Full_Name": {
+      "type": "string"
+    },
+    "Age": {
+      "type": "integer"
+    }
+  }
+}

@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: strapi_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: strapi
+      POSTGRES_PASSWORD: strapi123
+      POSTGRES_DB: strapidb
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - strapi-network
+
+  strapi:
+    build: 
+      context: .
+    container_name: strapi_app
+    restart: always
+    env_file:
+      - ./.env
+    depends_on:
+      - postgres
+    expose:
+      - 1337
+    volumes:
+      - ./uploads:/uploads
+    networks:
+      - strapi-network
+
+  nginx:
+    image: nginx:alpine
+    container_name: strapi_nginx
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - strapi
+    networks:
+      - strapi-network
+
+volumes:
+  pgdata:
+
+networks:
+  strapi-network:
+    driver: bridge
