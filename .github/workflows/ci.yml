@@ -50,5 +50,5 @@ jobs:
           git config --global user.email "github-actions@github.com"
           echo "$IMAGE_TAG" > image_tag.txt
           git add image_tag.txt
-          git commit -m "Update image tag to $IMAGE_TAG"
-          git push origin main
+          git diff --cached --quiet || git commit -m "Update image tag to $IMAGE_TAG"
+          git push origin main || true
