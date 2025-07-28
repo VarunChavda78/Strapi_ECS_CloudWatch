@@ -1,5 +1,9 @@
 resource "aws_ecs_cluster" "strapi_cluster" {
   name = "strapi-varun-cluster"
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
 }
 
 resource "aws_iam_role" "ecs_task_execution_role" {
