@@ -40,7 +40,7 @@ jobs:
         working-directory: ${{ env.TF_DIR }}
         run: terraform apply -auto-approve -var="image_tag=$IMAGE_TAG"
 
-      - name: Commit Statefile to Repo
+      - name: Commit Statefile to Repo.
         working-directory: ${{ env.TF_DIR }}
         if: always()
         run: |
