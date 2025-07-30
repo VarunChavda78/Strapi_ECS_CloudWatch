@@ -44,7 +44,7 @@ jobs:
           docker build -t $IMAGE_REPO:$IMAGE_TAG .
           docker push $IMAGE_REPO:$IMAGE_TAG
 
-      - name: Commit image tag to repo
+      - name: Commit image tag to repo.
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
