@@ -102,7 +102,7 @@ resource "aws_ecs_task_definition" "strapi_task" {
 resource "aws_ecs_service" "strapi_service" {
   name            = "strapi-varun-service"
   cluster         = aws_ecs_cluster.strapi_cluster.id
-  task_definition = aws_ecs_task_definition.strapi_task.arn
+  task_definition = aws_ecs_task_definition.strapi_task.arn_without_revision
   desired_count   = var.desired_count
 
   launch_type = "FARGATE"
