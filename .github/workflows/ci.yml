@@ -36,7 +36,7 @@ jobs:
       - name: Set dynamic image tag using GitHub run number
         id: set_tag
         run: |
-          echo "IMAGE_TAG=latest" >> $GITHUB_ENV
+          echo "IMAGE_TAG=v1" >> $GITHUB_ENV
 
       - name: Build and push Docker image
         working-directory: ./Strapi-app
