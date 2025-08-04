@@ -29,7 +29,7 @@ resource "aws_iam_role_policy_attachment" "ecs_execution_attach" {
 }
 
 resource "aws_iam_role" "codedeploy_role" {
-  name = "strapi-codedeploy-role"
+  name = "strapi-codedeploy-varun-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17",
@@ -128,13 +128,13 @@ resource "aws_ecs_service" "strapi_service" {
 
 
 resource "aws_codedeploy_app" "strapi_codedeploy_app" {
-  name = "strapi-bluegreen-app"
+  name = "strapi-bluegreen-varun-app"
   compute_platform = "ECS"
 }
 
 resource "aws_codedeploy_deployment_group" "strapi_codedeploy_group" {
   app_name               = aws_codedeploy_app.strapi_codedeploy_app.name
-  deployment_group_name  = "strapi-bluegreen-deployment-group"
+  deployment_group_name  = "strapi-bluegreen-varun-deployment-group"
   service_role_arn       = aws_iam_role.codedeploy_role.arn
   deployment_config_name = "CodeDeployDefault.ECSCanary10Percent5Minutes"
 
