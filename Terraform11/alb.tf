@@ -69,7 +69,7 @@ resource "aws_lb_target_group" "strapi_blue_tg" {
   target_type = "ip"
 
   health_check {
-    path                = "/"
+    path                = "/admin"
     interval            = 30
     timeout             = 5
     healthy_threshold   = 2
@@ -86,7 +86,7 @@ resource "aws_lb_target_group" "strapi_green_tg" {
   target_type = "ip"
 
   health_check {
-    path                = "/"
+    path                = "/admin"
     interval            = 30
     timeout             = 5
     healthy_threshold   = 2
