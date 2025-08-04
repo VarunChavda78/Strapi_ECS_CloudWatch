@@ -45,22 +45,22 @@ jobs:
         run: |
           cat <<EOF > appspec.json
           {
-            "version": 1,
+            "version": 0,
             "Resources": [
-              {
+                {
                 "TargetService": {
-                  "Type": "AWS::ECS::Service",
-                  "Properties": {
+                    "Type": "AWS::ECS::Service",
+                    "Properties": {
                     "TaskDefinition": "$TASK_DEF_ARN",
                     "LoadBalancerInfo": {
-                      "ContainerName": "$CONTAINER_NAME",
-                      "ContainerPort": $CONTAINER_PORT
+                        "ContainerName": "$CONTAINER_NAME",
+                        "ContainerPort": $CONTAINER_PORT
                     }
-                  }
+                    }
                 }
-              }
+                }
             ]
-          }
+            }
           EOF
 
       - name: Trigger CodeDeploy Blue/Green Deployment
