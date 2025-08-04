@@ -14,8 +14,8 @@ jobs:
       TASK_FAMILY: strapi-bluegreen
       CONTAINER_NAME: strapi-varun-container
       CONTAINER_PORT: 1337
-      CODEDEPLOY_APP_NAME: strapi-bluegreen-app
-      CODEDEPLOY_DEPLOYMENT_GROUP: strapi-bluegreen-deployment-group
+      CODEDEPLOY_APP_NAME: strapi-bluegreen-varun-app
+      CODEDEPLOY_DEPLOYMENT_GROUP: strapi-bluegreen-varun-deployment-group
 
     steps:
       - name: Checkout Code
@@ -88,22 +88,11 @@ jobs:
 
       - name: Trigger CodeDeploy Blue/Green Deployment
         run: |
-          cat <<EOF > deployment.json
-          {
-            "applicationName": "$CODEDEPLOY_APP_NAME",
-            "deploymentGroupName": "$CODEDEPLOY_DEPLOYMENT_GROUP",
-            "revision": {
-              "revisionType": "AppSpecContent",
-              "appSpecContent": {
-                "content": $(jq -Rs . < appspec.json)
-              }
-            },
-            "deploymentConfigName": "CodeDeployDefault.ECSCanary10Percent5Minutes",
-            "description": "Green deployment with image tag: $IMAGE_TAG"
-          }
-          EOF
+          CONTENT=$(jq -Rs . < appspec.json)
 
-          aws deploy create-deployment --cli-input-json file://deployment.json
-
-        
-        
+          aws deploy create-deployment \
+            --application-name $CODEDEPLOY_APP_NAME \
+            --deployment-group-name $CODEDEPLOY_DEPLOYMENT_GROUP \
+            --revision revisionType=AppSpecContent,appSpecContent="{\"content\":$CONTENT}" \
+            --deployment-config-name CodeDeployDefault.ECSCanary10Percent5Minutes \
+            --description "Green deployment with image tag: $IMAGE_TAG"
