@@ -33,36 +33,13 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ env.AWS_REGION }}
 
-      - name: Get current task definition
+      - name: Get Task Definition ARN
         run: |
-          aws ecs describe-task-definition \
-            --task-definition $TASK_FAMILY \
-            > task-def.json
-
-      - name: Register new task definition with updated image
-        run: |
-          IMAGE="$ECR_REPO:$IMAGE_TAG"
-
-          jq --arg IMAGE "$IMAGE" \
-             --arg CONTAINER_NAME "$CONTAINER_NAME" \
-             '.taskDefinition.containerDefinitions |= map(if .name == $CONTAINER_NAME then .image = $IMAGE else . end) |
-              {
-                family: .taskDefinition.family,
-                executionRoleArn: .taskDefinition.executionRoleArn,
-                networkMode: .taskDefinition.networkMode,
-                containerDefinitions: .taskDefinition.containerDefinitions,
-                requiresCompatibilities: .taskDefinition.requiresCompatibilities,
-                cpu: .taskDefinition.cpu,
-                memory: .taskDefinition.memory
-              }' \
-              task-def.json > new-task-def.json
-
-          TASK_DEF_ARN=$(aws ecs register-task-definition \
-            --cli-input-json file://new-task-def.json \
-            --query 'taskDefinition.taskDefinitionArn' \
-            --output text)
-
-          echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
+            TASK_DEF_ARN=$(aws ecs describe-task-definition \
+              --task-definition $TASK_FAMILY \
+              --query "taskDefinition.taskDefinitionArn" \
+              --output text)
+            echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
 
       - name: Prepare AppSpec file for CodeDeploy
         run: |
