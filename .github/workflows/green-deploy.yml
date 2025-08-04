@@ -88,11 +88,14 @@ jobs:
 
       - name: Trigger CodeDeploy Blue/Green Deployment
         run: |
-          CONTENT=$(jq -c . appspec.json)
-
-          aws deploy create-deployment \
-            --application-name $CODEDEPLOY_APP_NAME \
-            --deployment-group-name $CODEDEPLOY_DEPLOYMENT_GROUP \
-            --revision revisionType=AppSpecContent,appSpecContent="{\"content\":\"$CONTENT\"}" \
-            --deployment-config-name CodeDeployDefault.ECSCanary10Percent5Minutes \
-            --description "Green deployment with image tag: $IMAGE_TAG"
+            RAW_CONTENT=$(jq -c . appspec.json)
+            
+            ESCAPED_CONTENT=$(printf '%s' "$RAW_CONTENT" | sed 's/"/\\"/g')
+        
+            aws deploy create-deployment \
+              --application-name $CODEDEPLOY_APP_NAME \
+              --deployment-group-name $CODEDEPLOY_DEPLOYMENT_GROUP \
+              --revision revisionType=AppSpecContent,appSpecContent="{\"content\":\"$ESCAPED_CONTENT\"}" \
+              --deployment-config-name CodeDeployDefault.ECSCanary10Percent5Minutes \
+              --description "Green deployment with image tag: $IMAGE_TAG"
+        
