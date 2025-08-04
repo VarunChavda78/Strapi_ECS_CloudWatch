@@ -93,6 +93,6 @@ jobs:
           aws deploy create-deployment \
             --application-name $CODEDEPLOY_APP_NAME \
             --deployment-group-name $CODEDEPLOY_DEPLOYMENT_GROUP \
-            --revision "revisionType=AppSpecContent,appSpecContent={\"content\":\"$CONTENT\"}" \
+            --revision revisionType=AppSpecContent,appSpecContent="{\"content\":\"$CONTENT\"}" \
             --deployment-config-name CodeDeployDefault.ECSCanary10Percent5Minutes \
             --description "Green deployment with image tag: $IMAGE_TAG"
