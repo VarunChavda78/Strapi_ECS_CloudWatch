@@ -41,12 +41,12 @@ jobs:
 
       - name: Register new task definition with updated image
         run: |
-            IMAGE="$ECR_REPO:$IMAGE_TAG"
-        
-            jq --arg IMAGE "$IMAGE" \
-                --arg CONTAINER_NAME "$CONTAINER_NAME" \
-                '.taskDefinition.containerDefinitions |= map(if .name == $CONTAINER_NAME then .image = $IMAGE else . end) |
-                {
+          IMAGE="$ECR_REPO:$IMAGE_TAG"
+
+          jq --arg IMAGE "$IMAGE" \
+             --arg CONTAINER_NAME "$CONTAINER_NAME" \
+             '.taskDefinition.containerDefinitions |= map(if .name == $CONTAINER_NAME then .image = $IMAGE else . end) |
+              {
                 family: .taskDefinition.family,
                 executionRoleArn: .taskDefinition.executionRoleArn,
                 networkMode: .taskDefinition.networkMode,
@@ -54,38 +54,45 @@ jobs:
                 requiresCompatibilities: .taskDefinition.requiresCompatibilities,
                 cpu: .taskDefinition.cpu,
                 memory: .taskDefinition.memory
-                }' \
-                task-def.json > new-task-def.json
-        
-            TASK_DEF_ARN=$(aws ecs register-task-definition \
+              }' \
+              task-def.json > new-task-def.json
+
+          TASK_DEF_ARN=$(aws ecs register-task-definition \
             --cli-input-json file://new-task-def.json \
             --query 'taskDefinition.taskDefinitionArn' \
             --output text)
-        
-            echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
-          
 
-      - name: Trigger CodeDeploy Blue/Green Deployment
+          echo "TASK_DEF_ARN=$TASK_DEF_ARN" >> $GITHUB_ENV
+
+      - name: Prepare AppSpec file for CodeDeploy
         run: |
-          aws deploy create-deployment \
-            --application-name $CODEDEPLOY_APP_NAME \
-            --deployment-group-name $CODEDEPLOY_DEPLOYMENT_GROUP \
-            --revision "revisionType=AppSpecContent,appSpecContent={\"content\":\"{
-              \\\"version\\\":1,
-              \\\"Resources\\\":[
-                {
-                  \\\"TargetService\\\":{
-                    \\\"Type\\\":\\\"AWS::ECS::Service\\\",
-                    \\\"Properties\\\":{
-                      \\\"TaskDefinition\\\":\\\"$TASK_DEF_ARN\\\",
-                      \\\"LoadBalancerInfo\\\":{
-                        \\\"ContainerName\\\":\\\"$CONTAINER_NAME\\\",
-                        \\\"ContainerPort\\\":$CONTAINER_PORT
-                      }
+          cat <<EOF > appspec.json
+          {
+            "version": 1,
+            "Resources": [
+              {
+                "TargetService": {
+                  "Type": "AWS::ECS::Service",
+                  "Properties": {
+                    "TaskDefinition": "$TASK_DEF_ARN",
+                    "LoadBalancerInfo": {
+                      "ContainerName": "$CONTAINER_NAME",
+                      "ContainerPort": $CONTAINER_PORT
                     }
                   }
                 }
-              ]
-            }\"}" \
+              }
+            ]
+          }
+          EOF
+
+      - name: Trigger CodeDeploy Blue/Green Deployment
+        run: |
+          CONTENT=$(jq -c . appspec.json)
+
+          aws deploy create-deployment \
+            --application-name $CODEDEPLOY_APP_NAME \
+            --deployment-group-name $CODEDEPLOY_DEPLOYMENT_GROUP \
+            --revision "revisionType=AppSpecContent,appSpecContent={\"content\":\"$CONTENT\"}" \
             --deployment-config-name CodeDeployDefault.ECSCanary10Percent5Minutes \
             --description "Green deployment with image tag: $IMAGE_TAG"
