@@ -88,14 +88,19 @@ jobs:
 
       - name: Trigger CodeDeploy Blue/Green Deployment
         run: |
+            # Read appspec.json and convert to escaped single-line string
             RAW_CONTENT=$(jq -c . appspec.json)
-            
             ESCAPED_CONTENT=$(printf '%s' "$RAW_CONTENT" | sed 's/"/\\"/g')
         
-            eval aws deploy create-deployment \
-                --application-name "$CODEDEPLOY_APP_NAME" \
-                --deployment-group-name "$CODEDEPLOY_DEPLOYMENT_GROUP" \
-                --revision revisionType=AppSpecContent,appSpecContent="{\"content\":\"$ESCAPED_CONTENT\"}" \
-                --deployment-config-name CodeDeployDefault.ECSCanary10Percent5Minutes \
-                --description "\"Green deployment with image tag: $IMAGE_TAG\""
+            # Construct the revision parameter correctly
+            REVISION="revisionType=AppSpecContent,appSpecContent={\"content\":\"$ESCAPED_CONTENT\"}"
+        
+            # Trigger CodeDeploy
+            aws deploy create-deployment \
+              --application-name "$CODEDEPLOY_APP_NAME" \
+              --deployment-group-name "$CODEDEPLOY_DEPLOYMENT_GROUP" \
+              --revision $REVISION \
+              --deployment-config-name CodeDeployDefault.ECSCanary10Percent5Minutes \
+              --description "Green deployment with image tag: $IMAGE_TAG"
+        
         
