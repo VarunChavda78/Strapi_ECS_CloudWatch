@@ -76,3 +76,8 @@ jobs:
           --query "deploymentId" --output text)
 
           echo "DEPLOYMENT_ID=$DEPLOYMENT_ID" >> $GITHUB_ENV
+
+      - name: Wait for Deployment to Complete
+        run: |
+          echo "Waiting for deployment to finish..."
+          aws deploy wait deployment-successful --deployment-id $DEPLOYMENT_ID
